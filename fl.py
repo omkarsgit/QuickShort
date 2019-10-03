@@ -1,22 +1,23 @@
 import json
+import yaml
 import string
 import random
 import flask
-from flask import request, jsonify, redirect
+from flask import request, jsonify, redirect, render_template
 
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
 
 # Create some test data for our catalog in the form of a list of dictionaries.
-with open('users', 'r') as users_file:
-    users = json.loads(users_file.read())
+with open('users.yaml', 'r') as users_file:
+    users = yaml.load(users_file.read(), Loader = yaml.Loader)
 
-with open('urls', 'r') as urls_file:
-    urls = json.loads(urls_file.read())
+with open('urls.yaml', 'r') as urls_file:
+    urls = yaml.load(urls_file.read(), Loader = yaml.Loader)
 
 def saver():
-    with open('urls', 'w') as urls_file:
-        urls_file.write(json.dumps(urls, indent=4, sort_keys=True))
+    with open('urls.yaml', 'w') as urls_file:
+        urls_file.write(yaml.dump(urls, Dumper = yaml.Dumper))
 
 def random_url_gen():
     random_url = ''.join([random.choice(string.ascii_lowercase) for i in range(8)])
@@ -28,7 +29,7 @@ def random_url_gen():
 
 def shortener(url, id_no):
     random_url = random_url_gen()
-    urls[random_url] = [url, id_no]
+    urls[id_no][random_url] = url
     # try sorting
     # with open('urls', 'w') as urls_file:
         # urls_file.write(json.dumps(urls, indent=4, sort_keys=True))
@@ -37,17 +38,18 @@ def shortener(url, id_no):
 
 @app.route('/', methods=['GET'])
 def home():
-    return '''<h1>API testing website</h1>
-<p>Only for users with API keys.</p>'''
+    return render_template('index.html')
+    # return '''<h1>API testing website</h1>
+# <p>Only for users with API keys.</p>'''
 
 @app.route('/api/shorten', methods=['GET', 'POST'])
 def api_shorten():
     if 'url' not in request.args:
         return jsonify({'status': 0, 'output': 'No url'})
     if 'api_key' in request.args:
-        for i in users:
+        for idx, i in enumerate(users):
             if i['api_key'] == request.args['api_key']:
-                return jsonify({'status': 1, 'output': shortener(request.args['url'], i['id'])})
+                return jsonify({'status': 1, 'output': shortener(request.args['url'], idx)})
         return jsonify({'status': 0, 'output': 'Bad api_key'})
     else:
         return jsonify({'status': 0, 'output': 'No api_key'})
@@ -59,21 +61,31 @@ def api_change():
     if 'short' not in request.args:
         return jsonify({'status': 0, 'output': 'No short'})
     if 'api_key' in request.args:
-        for i in users:
-            if i['api_key'] == request.args['api_key'] and urls[request.args['short']][1] == i['id']:
-                urls[request.args['short']][0] = request.args['url']
+        for idx, i in enumerate(users):
+            if i['api_key'] == request.args['api_key'] and short in urls[idx]:
+                urls[idx][short] = request.args['url']
                 saver()
                 return jsonify({'status': 1})
         return jsonify({'status': 0, 'output': 'Bad api_key'})
     else:
         return jsonify({'status': 0, 'output': 'No api_key'})
 
+@app.route('/api/list', methods=['GET', 'POST'])
+def api_list():
+    if 'api_key' in request.args:
+        for idx, i in enumerate(users):
+            if i['api_key'] == request.args['api_key']:
+                return jsonify({'status': 1, 'output': urls[idx]})
+        return jsonify({'status': 0, 'output': 'Bad api_key'})
+    else:
+        return jsonify({'status': 0, 'output': 'No api_key'})
+
 @app.route('/<short>', methods=['GET', 'POST'])
 def redir(short):
-    if short in urls:
-        return redirect(urls[short][0])
-    else:
-        return '<b>404 NOT FOUND<b>', 404
+    for user_links in urls:
+        if short in user_links:
+            return redirect(user_links[short])
+    return '<b>404 NOT FOUND</b>', 404
         
 app.run(host="0.0.0.0")
 # app.run()
