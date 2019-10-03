@@ -6,8 +6,8 @@
     <p><a href={{ request.url_root }}api/shorten>Shorten</a></p>
     <p><a href={{ request.url_root }}api/change>Change</a></p>
     <p><a href={{ request.url_root }}api/list>List</a> <i>TODO</i></p>
-    <form action='/api/list'>
-      API key: <input name='api_key'></input>
+    <form action='/list' method='POST'>
+      API key: <br><input name='api_key'></input>
       <input type="submit" value="Submit">
     </form>
   </body>

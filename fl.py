@@ -36,12 +36,6 @@ def shortener(url, id_no):
     saver()
     return random_url
 
-@app.route('/', methods=['GET'])
-def home():
-    return render_template('index.html')
-    # return '''<h1>API testing website</h1>
-# <p>Only for users with API keys.</p>'''
-
 @app.route('/api/shorten', methods=['GET', 'POST'])
 def api_shorten():
     if 'url' not in request.args:
@@ -80,14 +74,30 @@ def api_list():
     else:
         return jsonify({'status': 0, 'output': 'No api_key'})
 
+# Not API Calls
+@app.route('/', methods=['GET'])
+def home():
+    return render_template('index.html')
+    # return '''<h1>API testing website</h1>
+# <p>Only for users with API keys.</p>'''
+
 @app.route('/<short>', methods=['GET', 'POST'])
 def redir(short):
     for user_links in urls:
         if short in user_links:
             return redirect(user_links[short])
     return '<b>404 NOT FOUND</b>', 404
-        
+
+@app.route('/list', methods=['POST'])
+def get_list():
+    if 'api_key' in request.form:
+        for idx, i in enumerate(users):
+            if i['api_key'] == request.form['api_key']:
+                return render_template('list.html', urls = urls[idx])
+        return '<b>BAD API KEY</b>', 401
+    else:
+        return '<b>404 NOT FOUND</b>', 404
+
 app.run(host="0.0.0.0")
 # app.run()
 # https://blog.miguelgrinberg.com/post/designing-a-restful-api-with-python-and-flask
-
