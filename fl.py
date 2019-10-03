@@ -93,7 +93,7 @@ def get_list():
     if 'api_key' in request.form:
         for idx, i in enumerate(users):
             if i['api_key'] == request.form['api_key']:
-                return render_template('list.html', urls = urls[idx])
+                return render_template('list.html',user = users[idx]['username'], urls = urls[idx])
         return '<b>BAD API KEY</b>', 401
     else:
         return '<b>404 NOT FOUND</b>', 404
