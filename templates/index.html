@@ -2,12 +2,12 @@
   <body>
     <!--<h1>Hello. Welcome to our link shortener.</h1>-->
     <!--<h2>Fill the form below.</h2>-->
-    <p>API Calls:</p>
+    <h2>API Calls:</h2>
     <p><a href={{ request.url_root }}api/shorten>Shorten</a></p>
     <p><a href={{ request.url_root }}api/change>Change</a></p>
     <p><a href={{ request.url_root }}api/list>List</a> <i>TODO</i></p>
     <form action='/list' method='POST'>
-      API key: <br><input name='api_key'></input>
+      <b>API key:</b> <br><input name='api_key'></input>
       <input type="submit" value="Submit">
     </form>
   </body>

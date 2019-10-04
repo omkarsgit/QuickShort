@@ -8,8 +8,8 @@
       </tr>
       {% for key, value in urls.items() %}
         <tr>
-          <td>{{ key }}</td>
-          <td>{{ value }}</td>
+          <td><a href={{ request.url_root }}{{ key }}>{{ key }}</a></td>
+          <td><a href={{ value }}>{{ value }}</a></td>
         </tr>
       {% endfor %}
     </table>
