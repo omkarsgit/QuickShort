@@ -56,10 +56,30 @@ def api_change():
         return jsonify({'status': 0, 'output': 'No short'})
     if 'api_key' in request.args:
         for idx, i in enumerate(users):
-            if i['api_key'] == request.args['api_key'] and short in urls[idx]:
-                urls[idx][short] = request.args['url']
-                saver()
-                return jsonify({'status': 1})
+            if i['api_key'] == request.args['api_key']:
+                if request.args['short'] in urls[idx]:
+                    urls[idx][request.args['short']] = request.args['url']
+                    saver()
+                    return jsonify({'status': 1})
+                else:
+                    return jsonify({'status': 0, 'output': 'Bad short'})
+        return jsonify({'status': 0, 'output': 'Bad api_key'})
+    else:
+        return jsonify({'status': 0, 'output': 'No api_key'})
+
+@app.route('/api/delete', methods=['GET', 'POST'])
+def api_delete():
+    if 'short' not in request.args or not request.args['short']:
+        return jsonify({'status': 0, 'output': 'No short'})
+    if 'api_key' in request.args:
+        for idx, i in enumerate(users):
+            if i['api_key'] == request.args['api_key']:
+                if request.args['short'] in urls[idx]:
+                    urls[idx].pop(request.args['short'])
+                    saver()
+                    return jsonify({'status': 1})
+                else:
+                    return jsonify({'status': 0, 'output': 'Bad short'})
         return jsonify({'status': 0, 'output': 'Bad api_key'})
     else:
         return jsonify({'status': 0, 'output': 'No api_key'})
